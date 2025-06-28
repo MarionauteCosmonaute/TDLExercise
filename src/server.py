@@ -31,6 +31,9 @@ def fetchAll():
 
 @app.post("/tasks")
 def create(task: TaskModel):
+    if len(task.name)<3:
+        #jsp exactement quel code de status mettre
+        raise HTTPException(status_code=426,detail="Task Title Too Small ! (min. 3)")
     t:Task = Task(
                     task.name,
                     Category(task.category),
@@ -51,7 +54,7 @@ def fetch(id :int):
 @app.put("/tasks/{id}")
 def edit(id: int):
     #TODO: implement edit
-    
+
     return {}
 
 @app.delete("/tasks/{id}")

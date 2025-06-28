@@ -40,3 +40,9 @@ class ToDoList:
         for t in self.toDoList:
             if t.id == id:
                 return t
+    
+    def popById(self, id:int)->Task | None:
+        for i in range(len(self.toDoList)):
+            if self.toDoList[i].id==id:
+                return self.toDoList.pop(i)
+                

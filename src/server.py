@@ -72,16 +72,17 @@ def edit(id: int, task: TaskModel):
         if(task.date):
             out.setDate(task.date)
         return out
-    else :
-        raise HTTPException(status_code=404,detail="Task Not Found")
+    raise HTTPException(status_code=404,detail="Task Not Found")
 
 
 @app.delete("/tasks/{id}")
 def remove(id :int):
-    #TODO: implement remove
-    return {}
+    out=tdl.popById(id)
+    if (out):
+        return out
+    raise HTTPException(status_code=404,detail="Task Not Found")
 
 @app.get("/categories")
 def fetchAllCategories():
-    #TODO: implement fetchAllCategories
+    Category.getList()
     return {}

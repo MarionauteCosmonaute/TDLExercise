@@ -1,27 +1,24 @@
-from fastapi import FastAPI
-from  Task import Task
+from fastapi import FastAPI,HTTPException
+from ToDoList import ToDoList
+from pydantic import BaseModel
+from Task import Task
 from Category import Category
 from Priority import Priority
 from datetime import datetime
-import json
 
 app=FastAPI()
 
-tasklist: list[Task] = [Task(
-                            "Etendre le linge",
-                            Category.Personnel,
-                            Priority.Haute,
-                            datetime(year=2025,month=6,day=30,hour=12,minute=30)),
-                        Task(
-                            "Faire les courses",
-                            Category.Personnel,
-                            Priority.Moyenne,
-                            datetime(year=2025,month=7,day=1,hour=10,minute=30)),
-                        Task(
-                            "Faire la vaisselle",
-                            Category.Personnel,
-                            Priority.Basse,
-                            datetime(year=2025,month=6,day=30,hour=12,minute=45))]
+tdl:ToDoList = ToDoList()
+tdl.demo()
+
+class TaskModel(BaseModel):
+    name : str
+    desc : str | None =None
+    category : int
+    priority : int
+    date : str
+
+
 
 @app.get("/")
 def read_root():
@@ -29,32 +26,40 @@ def read_root():
 
 @app.get("/tasks")
 def fetchAll():
-    serializedtasklist :list[dict]=[]
-    for t in tasklist: 
-        serializedtasklist.append( t.serialize())
-    return serializedtasklist
+    out = tdl.serialize()
+    return out
 
 @app.post("/tasks")
-def create():
-     #TODO: implement create
-    return {}
+def create(task: TaskModel):
+    t:Task = Task(
+                    task.name,
+                    Category(task.category),
+                    Priority(task.priority),
+                    datetime.strptime(task.date,"%d/%m/%Y %H:%M"))
+    if task.desc:
+        t.addDesc(task.desc)
+    tdl.add(t)
+    return t.serialize()
 
 @app.get("/tasks/{id}")
 def fetch(id :int):
-     #TODO: implement fetch
-    return {}
+    out=tdl.fetch(id)
+    if out["error"]:
+        raise HTTPException(status_code=404,detail=out["error"])
+    return out
 
 @app.put("/tasks/{id}")
 def edit(id: int):
-     #TODO: implement edit
+    #TODO: implement edit
+    
     return {}
 
 @app.delete("/tasks/{id}")
 def remove(id :int):
-     #TODO: implement remove
+    #TODO: implement remove
     return {}
 
 @app.get("/categories")
 def fetchAllCategories():
-     #TODO: implement fetchAllCategories
+    #TODO: implement fetchAllCategories
     return {}

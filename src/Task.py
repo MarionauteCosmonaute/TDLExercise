@@ -8,6 +8,11 @@ class Task:
     """
     Classe modélisant les tâches dans la to do list
     """
+    name : str
+    desc : str 
+    category : Category
+    priority : Priority
+    date : datetime.datetime
 
     #id autoincrémental
     id_gen = itertools.count()

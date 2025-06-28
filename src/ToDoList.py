@@ -15,29 +15,28 @@ class ToDoList:
                             "Etendre le linge",
                             Category.Personnel,
                             Priority.Haute,
-                            datetime(year=2025,month=6,day=30,hour=12,minute=30)),
+                            "30/06/2025 13:30"),
                         Task(
                             "Faire les courses",
                             Category.Personnel,
                             Priority.Moyenne,
-                            datetime(year=2025,month=7,day=1,hour=10,minute=30)),
+                            "01/07/2025 15:05"),
                         Task(
                             "Faire la vaisselle",
                             Category.Personnel,
                             Priority.Basse,
-                            datetime(year=2025,month=6,day=30,hour=12,minute=45))]
-    
+                            "02/05/2025 12:03")]
+
     def serialize(self)->list[dict]:
         serializedtasklist :list[dict]=[]
         for t in self.toDoList: #serialize each element of the list
             serializedtasklist.append( t.serialize())
         return serializedtasklist
-    
+
     def add(self, task : Task)->None:
         self.toDoList.append(task);
 
-    def fetch(self, id:int)->dict:
+    def fetch(self, id:int)->Task | None:
         for t in self.toDoList:
             if t.id == id:
-                return t.serialize()
-        return {"error": "not found"}
+                return t

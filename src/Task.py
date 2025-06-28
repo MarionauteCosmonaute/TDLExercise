@@ -1,7 +1,7 @@
 from Category import Category
 from Priority import Priority
 import itertools
-import datetime
+from datetime import datetime
 
 
 class Task:
@@ -12,7 +12,7 @@ class Task:
     desc : str 
     category : Category
     priority : Priority
-    date : datetime.datetime
+    date : datetime
 
     #id autoincrémental
     id_gen = itertools.count()
@@ -22,7 +22,7 @@ class Task:
                     name: str ,
                     category: Category,
                     priority: Priority,
-                    date:datetime.datetime ) -> None:
+                    date:str ) -> None:
         """
         
         Constructeur de Task, contient tous les champs obligatoires d'une tache
@@ -37,17 +37,17 @@ class Task:
         self.name=name
         self.category=category
         self.priority=priority
-        self.date=date
+        self.date=datetime.strptime(date,"%d/%m/%Y %H:%M")
         
     
-    def addDesc(self,
+    def setDesc(self,
                 description: str):
         """
-        Permet d'ajouter le champ facultatif correspondant à la description
+        Permet d'ajouter/modifier le champ facultatif correspondant à la description
         """
         self.desc=description
     
-    def serialize(self):
+    def serialize(self) -> dict:
         """
         renvoie une représentation de l'objet sous forme de dictionnaire afin de le rendre serializable
         """
@@ -62,4 +62,15 @@ class Task:
         if (hasattr(self,"desc")):
             out["desc"]=self.desc
         return out
+
+    def setName(self,name: str) -> None:
+        self.name=name
+
+    def setCategory(self,category:Category)->None:
+        self.category=category
     
+    def setPriority(self,priority:Priority)->None:
+        self.priority=priority
+
+    def setDate(self,date:str)->None:
+        self.date=datetime.strptime(date,"%d/%m/%Y %H:%M")

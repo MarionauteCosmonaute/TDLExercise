@@ -12,11 +12,11 @@ tdl:ToDoList = ToDoList()
 tdl.demo()
 
 class TaskModel(BaseModel):
-    name : str
+    name : str | None
     desc : str | None =None
-    category : int
-    priority : int
-    date : str
+    category : int | None
+    priority : int | None
+    date : str | None
 
 
 
@@ -31,31 +31,50 @@ def fetchAll():
 
 @app.post("/tasks")
 def create(task: TaskModel):
+    if ( task.name == None or task.category == None or task.priority == None or task.date == None ):
+        raise HTTPException(status_code=400,detail="Requiered Field(s) Weren't Filled")
     if len(task.name)<3:
-        #jsp exactement quel code de status mettre
-        raise HTTPException(status_code=426,detail="Task Title Too Small ! (min. 3)")
+        raise HTTPException(status_code=400,detail="Task Title Too Small ! (min. 3)")
     t:Task = Task(
                     task.name,
                     Category(task.category),
                     Priority(task.priority),
-                    datetime.strptime(task.date,"%d/%m/%Y %H:%M"))
+                    task.date)
     if task.desc:
-        t.addDesc(task.desc)
+        t.setDesc(task.desc)
     tdl.add(t)
     return t.serialize()
 
 @app.get("/tasks/{id}")
 def fetch(id :int):
     out=tdl.fetch(id)
-    if out["error"]:
-        raise HTTPException(status_code=404,detail=out["error"])
-    return out
+    if out:
+        return out.serialize()
+    else:
+        raise HTTPException(status_code=404,detail="Task Not Found")
+    
 
 @app.put("/tasks/{id}")
-def edit(id: int):
+def edit(id: int, task: TaskModel):
     #TODO: implement edit
+    out=tdl.fetch(id)
+    if out:
+        if(task.name):
+            if len(task.name)<3:
+                raise HTTPException(status_code=400,detail="Task Title Too Small ! (min. 3)")
+            out.setName(task.name)
+        if(task.category):
+            out.setCategory(Category(task.category))
+        if(task.priority):
+            out.setPriority(Priority(task.priority))
+        if(task.desc):
+            out.setDesc(task.desc)
+        if(task.date):
+            out.setDate(task.date)
+        return out
+    else :
+        raise HTTPException(status_code=404,detail="Task Not Found")
 
-    return {}
 
 @app.delete("/tasks/{id}")
 def remove(id :int):

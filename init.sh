@@ -11,7 +11,7 @@ if command -V python python3
         python -m venv .venv
         source .venv/bin/activate
         pip install -r requirements.txt
-        echo "All done"
+        echo "Server done"
         exit 0
     else
         echo "ERROR: python is not installed on this machine"

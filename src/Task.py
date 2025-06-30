@@ -33,11 +33,11 @@ class Task:
         *date* : échéance de la tache
         
         """
-        self.id= next(self.id_gen)
         self.name=name
         self.category=category
         self.priority=priority
         self.date=datetime.strptime(date,"%d/%m/%Y %H:%M")
+        self.id= next(self.id_gen)
         
     
     def setDesc(self,

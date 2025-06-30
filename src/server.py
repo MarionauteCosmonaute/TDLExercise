@@ -12,11 +12,11 @@ tdl:ToDoList = ToDoList()
 tdl.demo()
 
 class TaskModel(BaseModel):
-    name : str | None
+    name : str | None =None
     desc : str | None =None
-    category : int | None
-    priority : int | None
-    date : str | None
+    category : int | None =None
+    priority : int | None =None
+    date : str | None =None
 
 
 
@@ -56,7 +56,6 @@ def fetch(id :int):
 
 @app.put("/tasks/{id}")
 def edit(id: int, task: TaskModel):
-    #TODO: implement edit
     out=tdl.fetch(id)
     if out:
         if(task.name):
@@ -71,7 +70,7 @@ def edit(id: int, task: TaskModel):
             out.setDesc(task.desc)
         if(task.date):
             out.setDate(task.date)
-        return out
+        return out.serialize()
     raise HTTPException(status_code=404,detail="Task Not Found")
 
 
@@ -79,10 +78,10 @@ def edit(id: int, task: TaskModel):
 def remove(id :int):
     out=tdl.popById(id)
     if (out):
-        return out
+        return out.serialize()
     raise HTTPException(status_code=404,detail="Task Not Found")
 
 @app.get("/categories")
 def fetchAllCategories():
-    Category.getList()
-    return {}
+    
+    return Category.getList()

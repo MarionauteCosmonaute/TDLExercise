@@ -54,8 +54,8 @@ class Task:
         out = {
                     "id" : self.id,
                     "name" : self.name,
-                    "category" : self.category.name,
-                    "priority" :self.priority.name,
+                    "category" : self.category.value,
+                    "priority" :self.priority.value,
                     "date" : self.date.strftime("%d/%m/%Y %H:%M")
                 }
         #attribut facultatif, ajout de celui ci que s'il existe

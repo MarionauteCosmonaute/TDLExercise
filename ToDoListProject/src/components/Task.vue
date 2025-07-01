@@ -1,0 +1,176 @@
+<script setup>
+import {ref, computed} from 'vue'
+const props = defineProps({
+    title: {
+        type: String,
+        required: true,
+    },
+    date :{
+        type : String,
+        required: true,
+    },
+    desc :{
+        type : String,
+        required : false
+    },
+    id: {
+        type : Number,
+        required : true 
+    },
+    priority: {
+        type : Number,
+        required : true
+    }
+})
+    let checked= false;
+    const delBtn = ref(null)
+    function remove(){
+        
+    }
+    
+    function showdel(){
+        console.log(delBtn);
+
+    }
+
+    const priorityClass = computed(() => {
+        return `priority-${props.priority}`
+    })
+
+
+</script>
+
+<template>
+    <div class="todo" @mouseenter="showdel">
+                <input class="checkbox" type="checkbox" :id="{ id }" v-model="checked" />
+                <div class="priority-indicator" :class="priorityClass"></div>
+                <div class="details">
+                    <div class="title">{{ title }}</div>
+                    <div class="date">{{ date }}</div>
+                    <div class="desc">{{ desc ? desc : " "}}</div>
+                </div>
+                <div class="modif-btns">
+                    <button class="edit-btn">
+                        <img class="edit-img" src="../assets/edit-button-svgrepo-com.svg">
+                    </button>
+                    <button class="del-btn" ref="delBtn" @click="remove" :id="{ id }" >X</button>
+                </div>
+    </div>
+</template>
+
+<style scoped>
+
+.modif-btns{
+    display:flex;
+    flex-direction: row;
+}
+
+.edit-btn{
+    background: none;
+    border: solid 2px gray;
+    border-radius: 5px;
+    margin-right: 5px;
+    cursor: pointer;
+    transition: all 300ms;
+}
+
+.edit-btn:hover{
+    background-color: gray;
+}
+
+.edit-img{
+    width: 30px;
+    height: 30px;
+}
+
+.todo{
+    max-height: 20vh; 
+    height: auto;
+    display:flex;
+    margin-left: 5vw;
+    margin-right: 5vw;
+    background-color: white;
+    justify-content: space-between;
+    box-shadow:  0 4px 20px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 2vh 2vw;
+    align-items: center;
+    overflow: hidden;
+    transition: translateY 300ms;
+}
+
+.todo .details{
+    width: 100%;
+    margin-left: 15px;
+
+}
+
+.todo .title{
+    font-size: 30px;
+    font-weight: 500;
+}
+
+.todo .date{
+    font-size: 20px;
+    font-weight: 200;
+}
+
+.todo .desc{
+    font-size: 15px;
+    font-weight: 100;
+    word-wrap: break-word;
+}
+
+
+.todo:hover{
+    transform: translateY(-1vh);
+}
+
+.todo .del-btn{
+    width: 40px;
+    height: 40px;
+    font-weight: 700;
+    font-size: 20px;
+    background-color: red;
+    color: white;
+    border: solid 0px;
+    transition: all 300ms;
+    border-radius: 5px;
+    opacity: 1;
+}
+
+.todo .del-btn:hover{
+    cursor: pointer;
+    background-color: white;
+    border: solid 3px red;
+    color: red;
+}
+
+.checkbox{
+    background:none;
+    padding: 10px 10px;
+    border: solid 2px black;
+    cursor: pointer;
+    transform: scale(2);
+
+}
+
+.todo .priority-indicator{
+    height: 200%;
+    width: 5px;
+    margin-right: 3px;
+    margin-left: 18px;
+    border-radius: 5px;
+}
+.priority-0 {
+    background-color: green;
+}
+
+.priority-1 {
+    background-color: orange;
+}
+
+.priority-2 {
+    background-color: red;
+}
+</style> 

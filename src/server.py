@@ -4,9 +4,19 @@ from pydantic import BaseModel
 from Task import Task
 from Category import Category
 from Priority import Priority
-from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
+
+origins= ["http://localhost:5173"]
 
 app=FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 tdl:ToDoList = ToDoList()
 tdl.demo()

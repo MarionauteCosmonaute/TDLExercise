@@ -27,38 +27,48 @@ const props = defineProps({
     function remove(){
         
     }
-    
-    function showdel(){
-        console.log(delBtn);
 
-    }
+    let showEditBtns= ref(false);
 
     const priorityClass = computed(() => {
         return `priority-${props.priority}`
     })
 
+    const priorityKey = computed(()=>{
+        switch (props.priority) {
+            case 0:
+                return "Priorité Basse"
+            case 1:
+                return  "Priorité Moyenne"
+            case 2: 
+                return "Priorité Haute"
+            default:
+                return "This priority doesn't exist";
+        }
+    })
 
 </script>
 
 <template>
-    <div class="todo" @mouseenter="showdel">
+    <div class="todo" @mouseenter="showEditBtns=true" @mouseleave="showEditBtns=false">
                 <input class="checkbox" type="checkbox" :id="{ id }" v-model="checked" />
-                <div class="priority-indicator" :class="priorityClass"></div>
+                <div class="priority-indicator" :class="priorityClass" :title="priorityKey"></div>
                 <div class="details">
                     <div class="title">{{ title }}</div>
                     <div class="date">{{ date }}</div>
                     <div class="desc">{{ desc ? desc : " "}}</div>
                 </div>
-                <div class="modif-btns">
-                    <button class="edit-btn">
+                <div class="modif-btns" v-if="showEditBtns">
+                    <button class="edit-btn" title="Modifier" @click="$emit('edit',id)" >
                         <img class="edit-img" src="../assets/edit-button-svgrepo-com.svg">
                     </button>
-                    <button class="del-btn" ref="delBtn" @click="remove" :id="{ id }" >X</button>
+                    <button class="del-btn" ref="delBtn" @click="$emit('remove',id)" :id="{ id }" title="Supprimer">X</button>
                 </div>
     </div>
 </template>
 
 <style scoped>
+
 
 .modif-btns{
     display:flex;
@@ -157,9 +167,9 @@ const props = defineProps({
 
 .todo .priority-indicator{
     height: 200%;
-    width: 5px;
+    width: 10px;
     margin-right: 3px;
-    margin-left: 18px;
+    margin-left: 20px;
     border-radius: 5px;
 }
 .priority-0 {

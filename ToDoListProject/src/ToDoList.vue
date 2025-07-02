@@ -3,6 +3,7 @@ import {ref, onMounted, createApp,} from 'vue'
 import moment from 'moment'
 import Task from './components/Task.vue'
 import FormCreateTask from './components/FormCreateTask.vue'
+import FormEditTask from './components/FormEditTask.vue'
 
 
 const tasks = ref([])
@@ -11,11 +12,13 @@ onMounted(async ()=>{
     tasks.value = await response.json()
     tasks.value.sort(sortbyDate)
     ascend_Date = !ascend_Date
-    createApp(FormCreateTask).mount("#form-create")
 })
 
 let ascend_Date=true;
 let ascend_Prio=true;
+let shownCreateTaskForm=ref(false);
+let shownEditTaskForm = ref(false)
+let editTaskId = ref(null)
 
 function sortbyDate(a,b){
     const A=moment(a.date,"DD/MM/YYYY HH:mm",true);
@@ -44,6 +47,38 @@ function sortbyPriority(a,b){
     }
 }
 
+function showCreateTaskForm(){
+    shownCreateTaskForm.value=true;
+}
+function closeTaskForm(){
+    shownCreateTaskForm.value=false;
+}
+
+function mountEditTaskForm(id) {
+  shownEditTaskForm.value = true;
+  editTaskId.value = id;
+}
+
+function unmountEditTaskForm() {
+  shownEditTaskForm.value = false;
+  editTaskId.value = null;
+}
+
+async function removeTask(id){
+    const response = await fetch(`http://localhost:8000/tasks/${id}`,{method:"DELETE"});
+    const out=await response.json()
+    console.log(out);
+    const temp=[]
+    tasks.value.forEach((task)=>{
+            if(task.id != out.id){
+                temp.push(task);
+                console.log(temp);
+            }
+        });
+    tasks.value=temp;
+}
+
+
 </script>
 
 <template>
@@ -57,18 +92,23 @@ function sortbyPriority(a,b){
         </div>
     </header>
     <div class="todolist">
-        <Task
+        <Task @edit="mountEditTaskForm"
+            @remove="removeTask"
             v-for="task in tasks"
             :id="task.id"
             :title="task.name"
             :date="task.date"
             :desc="task.desc"
             :priority="task.priority"
+
+            
         />
     </div>
-    <button class="add-task-show-form">+</button>
-    <div class="form-create"></div>
-    <div class="form-edit"></div>
+    <button class="add-task-show-form" @click="showCreateTaskForm" title="Créer une nouvelle tâche">+</button>
+    <FormCreateTask v-if="shownCreateTaskForm" @close="closeTaskForm"/>
+    <Suspense>
+    <FormEditTask v-if="shownEditTaskForm" :id="editTaskId" @close="unmountEditTaskForm"/>
+    </Suspense>
 </template>
 
 <style scoped>
@@ -81,7 +121,7 @@ function sortbyPriority(a,b){
     width: 70px;
     height: 70px;
     border-radius: 10px;
-    background-color: green;
+    background-color: rgb(55, 55, 158);
     color: white;
     border: none;
     transition: all 300ms;
@@ -90,8 +130,8 @@ function sortbyPriority(a,b){
 
 .add-task-show-form:hover{
     background-color: white;
-    color: green;
-    border: solid green 3px;
+    color: rgb(55, 55, 158);
+    border: solid rgb(55, 55, 158) 3px;
 }
 
 .utilities{

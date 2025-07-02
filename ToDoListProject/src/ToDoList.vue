@@ -67,7 +67,6 @@ function unmountEditTaskForm() {
 async function removeTask(id){
     const response = await fetch(`http://localhost:8000/tasks/${id}`,{method:"DELETE"});
     const out=await response.json()
-    console.log(out);
     const temp=[]
     tasks.value.forEach((task)=>{
             if(task.id != out.id){
@@ -105,7 +104,10 @@ async function removeTask(id){
         />
     </div>
     <button class="add-task-show-form" @click="showCreateTaskForm" title="Créer une nouvelle tâche">+</button>
-    <FormCreateTask v-if="shownCreateTaskForm" @close="closeTaskForm"/>
+    <Suspense>
+        <FormCreateTask v-if="shownCreateTaskForm" @close="closeTaskForm"/>
+    </Suspense>
+
     <Suspense>
     <FormEditTask v-if="shownEditTaskForm" :id="editTaskId" @close="unmountEditTaskForm"/>
     </Suspense>

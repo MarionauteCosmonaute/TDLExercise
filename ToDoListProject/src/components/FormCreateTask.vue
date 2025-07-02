@@ -1,4 +1,28 @@
-<script>
+<script setup>
+import { computed, ref } from 'vue';
+import moment from 'moment';
+
+    let categories=ref([]);
+    let priorities=["Basse","Moyenne","Haute"];
+    const response= await fetch("http://localhost:8000/categories");
+    categories=await response.json();
+    const now= ref("");
+
+    const userInput=ref({
+        name:"",
+        category:"",
+        priority: "",
+        date: { day :"", hour: ""},
+        desc :""
+    })
+    
+    now.value= {date:moment().format("YYYY-MM-DD"),time:moment().format("HH:mm")};
+
+    setInterval(()=>{now.value.date=moment().format("YYYY-MM-DD")},1000*60*60);
+    setInterval(()=>{now.value.time=moment().format("HH:mm")},1000*60);
+    const minHour = computed(() => {
+        return moment(userInput.value.date.day,"YYYY-MM-DD",true).isSame(moment(now.value.date,"YYYY-MM-DD",true),"day") ? now.value.time : '00:00'
+})
 
 </script>
 <template>
@@ -6,7 +30,40 @@
         <div class="main-window">
             <div class="header">Créer une tâche</div>
             <form>
-
+                <div>
+                    <label for="name">Nom de la tâche: </label>
+                    <input type="text" name="name" id="name" required v-model="userInput.name">
+                </div>
+                <div>
+                    <label for="category" name="category" id="category" >Catégorie de la tâche:</label>
+                    <select v-model="userInput.category" required>
+                        <option disabled value="">Selectionnez une catégorie</option>
+                        <option v-for="category,index in categories" :value="index">
+                        {{ category }}
+                        </option>
+                    </select>
+                </div>
+                <div>
+                    <label for="priority" name="priority" id="priority">Priorité :</label>
+                    <select v-model="userInput.priority" required>
+                        <option disabled value="">Selectionnez une priorité</option>
+                        <option v-for="priority,index in priorities" :value="index">
+                        {{ priority }}
+                        </option>
+                    </select>
+                </div>
+                <div><label for="date" name="date" id="date">Date et Heure :</label>
+                    <input type="date" :min="now.date" v-model="userInput.date.day" required>
+                    <input type="time" :min="minHour" v-model="userInput.date.hour" required>
+                </div>
+                <div>
+                    <label for="desc" name="desc" id="desc"> Description :</label>
+                    <textarea v-model="userInput.desc" placeholder="Vous pouvez écrire une description de votre tâche ici (facultative)"></textarea>
+                </div>
+                <div>
+                    <input type="submit" value="Créer">
+                </div>
+                
             </form>
         </div>
         <button class="close-window" title="Fermer" @click="$emit('close')">X</button>
@@ -14,6 +71,10 @@
     
 </template>
 <style scoped>
+    form div{
+        display: flex;
+        align-items: center;
+    }
     .modal{
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;

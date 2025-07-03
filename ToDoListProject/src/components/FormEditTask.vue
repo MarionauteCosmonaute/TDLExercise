@@ -1,17 +1,65 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
+import moment from 'moment';
+    const emit=defineEmits(['close','refresh'])
+    const servURL="http://localhost:8000"
+    const props=defineProps({
+        id:{
+            type : Number,
+            required: true
+        }
+    });
+    const task=ref(null);
+    let categories=ref([]);
+    let priorities=["Basse","Moyenne","Haute"];
+    const responsec= await fetch(servURL+"/categories");
+    categories=await responsec.json();
 
-const props=defineProps({
-    id:{
-        type : Number,
-        required: true
+    const responset = await fetch(servURL+'/tasks/'+props.id);
+    task.value = await responset.json();
+    console.log(task.value);
+    const deadline=moment(task.value.date,"DD/MM/YYYY HH:mm");
+    const userInput=ref({
+        id:task.value.id,
+        name:task.value.name,
+        category:task.value.category,
+        priority:task.value.priority,
+        date: { day : deadline.format("YYYY-MM-DD"), hour: deadline.format("HH:mm")},
+        desc :task.value.desc
+    });
+    const now= ref("");
+    now.value= {date:moment().format("YYYY-MM-DD"),time:moment().format("HH:mm")};
+    setInterval(()=>{now.value.date=moment().format("YYYY-MM-DD")},1000*60*60);
+    setInterval(()=>{now.value.time=moment().format("HH:mm")},1000*60);
+    const minHour = computed(() => {
+        return moment(userInput.value.date.day,"YYYY-MM-DD",true).isSame(moment(now.value.date,"YYYY-MM-DD",true),"day") ? now.value.time : '00:00'
+    })
+
+    const apiSend = computed(()=>{
+        return servURL+"/tasks/"+props.id
+    })
+
+    
+    async function sendRequest(){
+        const newDeadLine=moment(userInput.value.date.day+" "+userInput.value.date.hour,"YYYY-MM-DD HH:mm",true).format("DD/MM/YYYY HH:mm");
+        const request={
+                            method : "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body : JSON.stringify({
+                                id : userInput.value.id,
+                                name : userInput.value.name,
+                                category : userInput.value.category,
+                                priority : userInput.value.priority,
+                                date : newDeadLine,
+                                desc : userInput.value.desc
+                            })
+                        };
+        console.log(request)
+        await fetch(servURL+"/tasks/"+props.id,request)
+        emit('refresh')
+        emit('close')
+        
     }
-});
-const task=ref(null);
-
-const response = await fetch('http://localhost:8000/tasks/'+props.id);
-task.value = await response.json()
-console.log(task.value);
 
 
 </script>
@@ -19,8 +67,40 @@ console.log(task.value);
     <div class="modal">
         <div class="main-window">
             <div class="header">Modifier une tâche</div>
-            <form>
-
+            <form @submit.prevent="sendRequest">
+                <div>
+                    <label for="name">Nom de la tâche: </label>
+                    <input type="text" name="name" id="name" required v-model="userInput.name" minlength="3">
+                </div>
+                <div>
+                    <label for="category" name="category" id="category" >Catégorie de la tâche:</label>
+                    <select v-model="userInput.category" required>
+                        <option disabled value="">Selectionnez une catégorie</option>
+                        <option v-for="category,index in categories" :value="index">
+                        {{ category }}
+                        </option>
+                    </select>
+                </div>
+                <div>
+                    <label for="priority" name="priority" id="priority">Priorité :</label>
+                    <select v-model="userInput.priority" required>
+                        <option disabled value="">Selectionnez une priorité</option>
+                        <option v-for="priority,index in priorities" :value="index">
+                        {{ priority }}
+                        </option>
+                    </select>
+                </div>
+                <div><label for="date" name="date" id="date">Date et Heure :</label>
+                    <input type="date" :min="now.date" v-model="userInput.date.day" required>
+                    <input type="time" :min="minHour" v-model="userInput.date.hour" required>
+                </div>
+                <div>
+                    <label for="desc" name="desc" id="desc"> Description :</label>
+                    <textarea v-model="userInput.desc" placeholder="Vous pouvez écrire une description de votre tâche ici (facultative)"></textarea>
+                </div>
+                <div>
+                    <input type="submit" value="Modifier">
+                </div>
             </form>
         </div>
         <button class="close-window" title="Fermer" @click="$emit('close')">X</button>
@@ -28,6 +108,34 @@ console.log(task.value);
 </template>
 
 <style scoped>
+
+    form div{
+        font-size: 20px;
+        margin: 10px 5px;
+        display: flex;
+        align-items: center;
+    }
+    form label{
+        width: 20%;
+    }
+    form input,
+    form option,
+    form select,
+    form textarea,
+    form button{
+        font-size: 20px;
+        margin: 0px 5px;
+        border-radius: 5px;
+        border: solid black 1px;
+        width: 100%;
+    }
+    form input:invalid,
+    form option:invalid,
+    form select:invalid{
+        border: solid red 2px
+    }
+
+
     .modal{
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;

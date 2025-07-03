@@ -7,20 +7,35 @@ import FormEditTask from './components/FormEditTask.vue'
 
 
 const tasks = ref([])
-onMounted(async ()=>{
-    const response = await fetch('http://localhost:8000/tasks')
-    tasks.value = await response.json()
-    tasks.value.sort(sortbyDate)
-    ascend_Date = !ascend_Date
-})
-
 let ascend_Date=true;
 let ascend_Prio=true;
 let shownCreateTaskForm=ref(false);
 let shownEditTaskForm = ref(false)
 let editTaskId = ref(null)
+let lastSort=ref(0); //0 => Date else=>Prio
+
+async function fetchAll(){
+    const response = await fetch('http://localhost:8000/tasks')
+    tasks.value = await response.json()
+    console.log(lastSort.value);
+    console.log(ascend_Date,ascend_Prio);
+    sortWrapper(tasks.value,lastSort.value)
+    console.log(tasks.value)
+}
+
+onMounted(async()=>{
+    fetchAll()
+});
+
+function sortWrapper(list,methodId){
+    console.log(lastSort.value);
+    console.log(ascend_Date,ascend_Prio);
+    list.sort(methodId === 0 ? sortbyDate : sortbyPriority);
+    lastSort.value=methodId;
+}
 
 function sortbyDate(a,b){
+    console.log("sort by Date" + ascend_Date ? "asc" : "desc")
     const A=moment(a.date,"DD/MM/YYYY HH:mm",true);
     const B=moment(b.date,"DD/MM/YYYY HH:mm",true);
     if(A.isBefore(B,"second")){
@@ -34,6 +49,7 @@ function sortbyDate(a,b){
 }
 
 function sortbyPriority(a,b){
+    console.log("sort by Date" + ascend_Date ? "asc" : "desc")
     const A=a.priority;
     const B=b.priority;
     if (A<B){
@@ -43,7 +59,7 @@ function sortbyPriority(a,b){
         if(A === B){
             return 0
         }
-        return ascend_Prio ? 1: 1;
+        return ascend_Prio ? 1: -1;
     }
 }
 
@@ -85,8 +101,12 @@ async function removeTask(id){
         <div>
             <div>Trier par:</div>
             <select>
-                <option @click="tasks.sort(sortbyDate); ascend_Date = !ascend_Date">Date {{ ascend_Date ? "↑" : "↓" }}</option>
-                <option @click="tasks.sort(sortbyPriority); ascend_Prio = !ascend_Prio">Priorité {{ ascend_Prio ? "↑" : "↓" }}</option>
+                <option @click="lastSort === 0 ?
+                            ascend_Date = !ascend_Date : ascend_Date =ascend_Date;
+                            sortWrapper(tasks,0);">Date {{ ascend_Date ?  "↓" : "↑"}}</option>
+                <option @click="lastSort === 1 ?
+                            ascend_Prio = !ascend_Prio : ascend_Prio = ascend_Prio;
+                            sortWrapper(tasks,1); ">Priorité {{ ascend_Prio ? "↓" : "↑" }}</option>
             </select>
         </div>
     </header>
@@ -105,11 +125,11 @@ async function removeTask(id){
     </div>
     <button class="add-task-show-form" @click="showCreateTaskForm" title="Créer une nouvelle tâche">+</button>
     <Suspense>
-        <FormCreateTask v-if="shownCreateTaskForm" @close="closeTaskForm"/>
+        <FormCreateTask v-if="shownCreateTaskForm" @close="closeTaskForm" @refresh="fetchAll"/>
     </Suspense>
 
     <Suspense>
-    <FormEditTask v-if="shownEditTaskForm" :id="editTaskId" @close="unmountEditTaskForm"/>
+        <FormEditTask v-if="shownEditTaskForm" :id="editTaskId" @close="unmountEditTaskForm" @refresh="fetchAll"/>
     </Suspense>
 </template>
 

@@ -1,12 +1,12 @@
 <script setup>
 import { computed, ref } from 'vue';
 import moment from 'moment';
-
+    const emit=defineEmits(['close','refresh']);
+    const servURL="http://localhost:8000"
     let categories=ref([]);
     let priorities=["Basse","Moyenne","Haute"];
-    const response= await fetch("http://localhost:8000/categories");
+    const response= await fetch(servURL+"/categories");
     categories=await response.json();
-    const now= ref("");
 
     const userInput=ref({
         name:"",
@@ -15,21 +15,41 @@ import moment from 'moment';
         date: { day :"", hour: ""},
         desc :""
     })
-    
+    const now= ref("");
     now.value= {date:moment().format("YYYY-MM-DD"),time:moment().format("HH:mm")};
-
     setInterval(()=>{now.value.date=moment().format("YYYY-MM-DD")},1000*60*60);
     setInterval(()=>{now.value.time=moment().format("HH:mm")},1000*60);
     const minHour = computed(() => {
         return moment(userInput.value.date.day,"YYYY-MM-DD",true).isSame(moment(now.value.date,"YYYY-MM-DD",true),"day") ? now.value.time : '00:00'
-})
+    })
+
+    async function sendRequest(){
+        const newDeadLine=moment(userInput.value.date.day+" "+userInput.value.date.hour,"YYYY-MM-DD HH:mm",true).format("DD/MM/YYYY HH:mm");
+        const request={
+                            method : "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body : JSON.stringify({
+                                id : userInput.value.id,
+                                name : userInput.value.name,
+                                category : userInput.value.category,
+                                priority : userInput.value.priority,
+                                date : newDeadLine,
+                                desc : userInput.value.desc
+                            })
+                        };
+        console.log(request)
+        await fetch(servURL+"/tasks",request)
+        emit('refresh')
+        emit('close')
+        
+    }
 
 </script>
 <template>
     <div class="modal">
         <div class="main-window">
             <div class="header">Créer une tâche</div>
-            <form>
+            <form @submit.prevent="sendRequest">
                 <div>
                     <label for="name">Nom de la tâche: </label>
                     <input type="text" name="name" id="name" required v-model="userInput.name" minlength="3">

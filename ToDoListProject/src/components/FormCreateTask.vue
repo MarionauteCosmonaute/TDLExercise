@@ -32,7 +32,7 @@ import moment from 'moment';
             <form>
                 <div>
                     <label for="name">Nom de la tâche: </label>
-                    <input type="text" name="name" id="name" required v-model="userInput.name">
+                    <input type="text" name="name" id="name" required v-model="userInput.name" minlength="3">
                 </div>
                 <div>
                     <label for="category" name="category" id="category" >Catégorie de la tâche:</label>
@@ -71,10 +71,32 @@ import moment from 'moment';
     
 </template>
 <style scoped>
+
     form div{
+        font-size: 20px;
+        margin: 10px 5px;
         display: flex;
         align-items: center;
     }
+    form label{
+        width: 20%;
+    }
+    form input,
+    form option,
+    form select,
+    form textarea{
+        font-size: 20px;
+        margin: 0px 5px;
+        border-radius: 5px;
+        border: solid black 1px;
+        width: 100%;
+    }
+    form input:invalid,
+    form option:invalid,
+    form select:invalid{
+        border: solid red 2px
+    }
+
     .modal{
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;

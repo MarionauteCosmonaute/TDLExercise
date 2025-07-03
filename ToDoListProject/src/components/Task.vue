@@ -1,4 +1,5 @@
 <script setup>
+import moment from 'moment';
 import {ref, computed} from 'vue'
 const props = defineProps({
     title: {
@@ -47,6 +48,14 @@ const props = defineProps({
         }
     })
 
+    const closeDeadline= computed(()=>{
+        return moment(props.date,"DD/MM/YYYY HH:mm",true).diff(moment(),'days') < 2;
+    });
+
+    const overdue=computed(()=>{
+        return moment(props.date,"DD/MM/YYYY HH:mm",true).diff(moment(),'seconds') <0;;
+    })
+
 </script>
 
 <template>
@@ -55,7 +64,11 @@ const props = defineProps({
                 <div class="priority-indicator" :class="priorityClass" :title="priorityKey"></div>
                 <div class="details">
                     <div class="title">{{ title }}</div>
-                    <div class="date">{{ date }}</div>
+                    <div class="date" :title="overdue ? 'Deadline Dépassée' : closeDeadline ? 'Deadline Proche' : '' ">{{ date }}
+                        <div :class="overdue ? 'overdue' : 'warn'" v-if="closeDeadline" src="../assets/warn.png">
+                            !
+                        </div>
+                    </div>
                     <div class="desc">{{ desc ? desc : " "}}</div>
                 </div>
                 <div class="modif-btns" v-if="showEditBtns">
@@ -93,6 +106,26 @@ const props = defineProps({
     height: 30px;
 }
 
+.warn,
+.overdue{
+    cursor:default;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    width: 25px;
+    height: 25px;
+    color:white;
+    border: solid 2px white ;
+    border-radius: 25px;
+}
+
+.warn{
+    background-color:orange;
+}
+.overdue{
+    background-color:red;
+}
 .todo{
     max-height: 20vh; 
     height: auto;

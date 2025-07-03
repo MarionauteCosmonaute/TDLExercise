@@ -2,7 +2,7 @@ from  Task import Task
 from Category import Category
 from Priority import Priority
 from datetime import datetime
-
+from pydantic import ValidationError
 class ToDoList:
 
     
@@ -11,21 +11,19 @@ class ToDoList:
         
         
     def demo(self):
-        self.toDoList = [Task(
-                            "Etendre le linge",
-                            Category.Personnel,
-                            Priority.Haute,
-                            "30/06/2025 13:30"),
-                        Task(
-                            "Faire les courses",
-                            Category.Personnel,
-                            Priority.Moyenne,
-                            "01/07/2025 15:05"),
-                        Task(
-                            "Faire la vaisselle",
-                            Category.Personnel,
-                            Priority.Basse,
-                            "02/05/2025 12:03")]
+        t1:dict={
+            'name' :        "Etendre le linge",
+            'category':     Category.Personnel.value,
+            'priority':     Priority.Haute.value,
+            'date':         "30/06/2025 13:30"
+        }
+        try:
+            T1:Task=Task(**t1)
+            self.toDoList.append(T1)
+            print(T1.model_dump())
+        except ValidationError as e:
+            print(e.errors())
+        
 
     def serialize(self)->list[dict]:
         serializedtasklist :list[dict]=[]

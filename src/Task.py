@@ -1,18 +1,22 @@
 from Category import Category
 from Priority import Priority
+from pydantic import BaseModel,field_validator,field_serializer
+from typing import ClassVar
 import itertools
 from datetime import datetime
 
 
-class Task:
+class Task(BaseModel):
     """
     Classe modélisant les tâches dans la to do list
     """
+    id : int
     name : str
-    desc : str 
-    category : Category
-    priority : Priority
+    desc : str | None
+    category : int
+    priority : int
     date : datetime
+    id_gen : ClassVar
 
     #id autoincrémental
     id_gen = itertools.count()
@@ -20,9 +24,10 @@ class Task:
 
     def __init__(self,
                     name: str ,
-                    category: Category,
-                    priority: Priority,
-                    date:str ) -> None:
+                    category: int,
+                    priority: int,
+                    date:str,
+                    desc :str |None =None ) -> None:
         """
         
         Constructeur de Task, contient tous les champs obligatoires d'une tache
@@ -33,11 +38,7 @@ class Task:
         *date* : échéance de la tache
         
         """
-        self.name=name
-        self.category=category
-        self.priority=priority
-        self.date=datetime.strptime(date,"%d/%m/%Y %H:%M")
-        self.id= next(self.id_gen)
+        super().__init__(id=next(self.id_gen),name=name,category=category,priority=priority,date=date,desc=desc)
         
     
     def setDesc(self,
@@ -51,26 +52,28 @@ class Task:
         """
         renvoie une représentation de l'objet sous forme de dictionnaire afin de le rendre serializable
         """
-        out = {
-                    "id" : self.id,
-                    "name" : self.name,
-                    "category" : self.category.value,
-                    "priority" :self.priority.value,
-                    "date" : self.date.strftime("%d/%m/%Y %H:%M")
-                }
-        #attribut facultatif, ajout de celui ci que s'il existe
-        if (hasattr(self,"desc")):
-            out["desc"]=self.desc
+        out=self.model_dump();
         return out
 
     def setName(self,name: str) -> None:
         self.name=name
 
     def setCategory(self,category:Category)->None:
-        self.category=category
+        self.category=category.value
     
     def setPriority(self,priority:Priority)->None:
-        self.priority=priority
+        self.priority=priority.value
 
     def setDate(self,date:str)->None:
         self.date=datetime.strptime(date,"%d/%m/%Y %H:%M")
+
+    @field_validator('date', mode='before')
+    def parse_date(cls, value):
+        if isinstance(value, str):
+            return datetime.strptime(value, "%d/%m/%Y %H:%M")
+        return value
+    
+    def model_dump(self):
+        dump=super().model_dump()
+        dump['date']=self.date.strftime("%d/%m/%Y %H:%M")
+        return dump

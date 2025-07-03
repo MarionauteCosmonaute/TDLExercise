@@ -1,6 +1,6 @@
 from fastapi import FastAPI,HTTPException
 from ToDoList import ToDoList
-from pydantic import BaseModel
+from pydantic import BaseModel,ValidationError
 from Task import Task
 from Category import Category
 from Priority import Priority
@@ -21,7 +21,7 @@ app.add_middleware(
 tdl:ToDoList = ToDoList()
 tdl.demo()
 
-class TaskModel(BaseModel):
+class RequestFields(BaseModel):
     name : str | None =None
     desc : str | None =None
     category : int | None =None
@@ -40,19 +40,13 @@ def fetchAll():
     return out
 
 @app.post("/tasks")
-def create(task: TaskModel):
-    if ( task.name == None or task.category == None or task.priority == None or task.date == None ):
-        raise HTTPException(status_code=400,detail="Requiered Field(s) Weren't Filled")
-    if len(task.name)<3:
-        raise HTTPException(status_code=400,detail="Task Title Too Small ! (min. 3)")
-    t:Task = Task(
-                    task.name,
-                    Category(task.category),
-                    Priority(task.priority),
-                    task.date)
-    if task.desc:
-        t.setDesc(task.desc)
-    tdl.add(t)
+def create(task: RequestFields):
+    request:dict =task.model_dump()
+    try:
+        t:Task = Task(**request)
+        tdl.add(t)
+    except ValidationError as e:
+        raise HTTPException(status_code=400,detail=e.json())
     return t.serialize()
 
 @app.get("/tasks/{id}")
@@ -65,7 +59,7 @@ def fetch(id :int):
     
 
 @app.put("/tasks/{id}")
-def edit(id: int, task: TaskModel):
+def edit(id: int, task: RequestFields):
     out=tdl.fetch(id)
     if out:
         if(task.name):

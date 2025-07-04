@@ -1,31 +1,37 @@
 <script setup>
 import moment from 'moment';
-import {ref, computed} from 'vue'
-const props = defineProps({
-    title: {
-        type: String,
-        required: true,
-    },
-    date :{
-        type : String,
-        required: true,
-    },
-    desc :{
-        type : String,
-        required : false
-    },
-    id: {
-        type : Number,
-        required : true 
-    },
-    priority: {
-        type : Number,
-        required : true
-    }
-})
+import {ref, computed, onMounted} from 'vue'
+    const props = defineProps({
+
+        title: {
+            type: String,
+            required: true,
+        },
+        date :{
+            type : String,
+            required: true,
+        },
+        desc :{
+            type : String,
+            required : false
+        },
+        id: {
+            type : Number,
+            required : true 
+        },
+        priority: {
+            type : Number,
+            required : true
+        },
+        category:{
+            type : Number,
+            required :true
+        }
+    })
     let checked= ref(false);
 
     let showEditBtns= ref(false);
+    let categories=ref([]);
 
     const priorityClass = computed(() => {
         return `priority-${props.priority}`
@@ -52,6 +58,24 @@ const props = defineProps({
         return moment(props.date,"DD/MM/YYYY HH:mm",true).diff(moment(),'seconds') <0;;
     })
 
+    const categoryIcon=computed(()=>{
+        switch(props.category){
+            case 0:
+                return '/src/assets/perso.svg'
+            case 1:
+                return '/src/assets/pro.svg'
+            case 2:
+                return '/src/assets/medical.svg'
+            case 3:
+                return '/src/assets/loisir.svg'
+        }
+    })
+
+    onMounted(async()=>{
+        const response= await fetch("http://localhost:8000/categories");
+        categories=await response.json();
+    })
+
 </script>
 
 <template>
@@ -59,7 +83,9 @@ const props = defineProps({
                 <input class="checkbox" type="checkbox" :id="{ id }" v-model="checked" />
                 <div class="priority-indicator" :class="priorityClass" :title="priorityKey"></div>
                 <div class="details">
-                    <div class="title">{{ title }}</div>
+                    <div class="title">{{ title }}
+                        <div><img class="category-icon" :src="categoryIcon" :title="categories[category]"></div>
+                    </div>
                     <div class="date" :title="overdue ? 'Deadline Dépassée' : closeDeadline ? 'Deadline Proche' : '' ">{{ date }}
                         <div :class="overdue ? 'overdue' : 'warn'" v-if="closeDeadline" src="../assets/warn.png">
                             !
@@ -77,6 +103,11 @@ const props = defineProps({
 </template>
 
 <style scoped>
+
+.category-icon{
+    width: 25px;
+    height: 25px;
+}
 
 
 .modif-btns{

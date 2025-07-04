@@ -203,6 +203,7 @@ onMounted(async()=>{
             :date="task.date"
             :desc="task.desc"
             :priority="task.priority"
+            :category="task.category"
 
             
         />

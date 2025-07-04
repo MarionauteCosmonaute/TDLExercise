@@ -6,7 +6,7 @@ from Category import Category
 from Priority import Priority
 from fastapi.middleware.cors import CORSMiddleware
 
-origins= ["http://localhost:5173"]
+origins= ["http://localhost:5173","http://localhost:4173"]
 
 app=FastAPI()
 

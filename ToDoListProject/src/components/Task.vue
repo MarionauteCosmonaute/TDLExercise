@@ -58,18 +58,6 @@ import {ref, computed, onMounted} from 'vue'
         return moment(props.date,"DD/MM/YYYY HH:mm",true).diff(moment(),'seconds') <0;;
     })
 
-    const categoryIcon=computed(()=>{
-        switch(props.category){
-            case 0:
-                return '/src/assets/perso.svg'
-            case 1:
-                return '/src/assets/pro.svg'
-            case 2:
-                return '/src/assets/medical.svg'
-            case 3:
-                return '/src/assets/loisir.svg'
-        }
-    })
 
     onMounted(async()=>{
         const response= await fetch("http://localhost:8000/categories");
@@ -84,7 +72,12 @@ import {ref, computed, onMounted} from 'vue'
                 <div class="priority-indicator" :class="priorityClass" :title="priorityKey"></div>
                 <div class="details">
                     <div class="title">{{ title }}
-                        <div><img class="category-icon" :src="categoryIcon" :title="categories[category]"></div>
+                        <div>
+                            <img class="category-icon" src="../assets/perso.svg" :title="categories[category]" v-if="category === 0">
+                            <img class="category-icon" src="../assets/pro.svg" :title="categories[category]" v-if="category===1">
+                            <img class="category-icon" src="/src/assets/medical.svg" :title="categories[category]" v-if="category===2">
+                            <img class="category-icon" src="/src/assets/loisir.svg" :title="categories[category]" v-if="category===3">
+                        </div>
                     </div>
                     <div class="date" :title="overdue ? 'Deadline Dépassée' : closeDeadline ? 'Deadline Proche' : '' ">{{ date }}
                         <div :class="overdue ? 'overdue' : 'warn'" v-if="closeDeadline" src="../assets/warn.png">

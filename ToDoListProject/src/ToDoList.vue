@@ -14,19 +14,20 @@ let shownCreateTaskForm=ref(false);
 let shownEditTaskForm = ref(false);
 let editTaskId = ref(null);
 let lastSort=ref(0); //0 => Date else=>Prio
+let filterBy=ref([])
+let categories=ref([]);
+let priorities=["Basse","Moyenne","Haute"];
+let filterValuesCategory=ref([]);
+let filterValuesPriority=ref([]);
+let tasksUnfiltered=[];
 
 async function fetchAll(){
     const response = await fetch('http://localhost:8000/tasks')
     tasks.value = await response.json();
-    console.log(lastSort.value);
-    console.log(ascend_Date,ascend_Prio);
     sortWrapper(tasks.value,lastSort.value);
-    console.log(tasks.value);
+
 }
 
-onMounted(async()=>{
-    fetchAll()
-});
 
 function sortWrapper(list,methodId){
     console.log(lastSort.value);
@@ -122,11 +123,45 @@ function edited(name){
     successNotify(name+" modifié");
 }
 
+function applyFilters(){
+    if(tasksUnfiltered.length === 0){
+        tasksUnfiltered=tasks.value;
+    }
+    tasks.value=[];
+    tasks.value=tasksUnfiltered.filter((task)=>validedByFilters(task))
+    successNotify("Filtres appliqués");
+}
+
+function removeFilters(){
+    tasks.value=tasksUnfiltered;
+    tasksUnfiltered=[];
+    filterBy=ref([]);
+    filterValuesCategory=ref([]);
+    filterValuesPriority=ref([]);
+    successNotify("Suppression des filtres effectuée");
+}
+
+function validedByFilters(task){
+    return (!filterBy.value.includes("category") || 
+            filterBy.value.includes("category") && filterValuesCategory.value.includes(task.category)) 
+            && 
+            (!filterBy.value.includes("priority") ||
+            filterBy.value.includes("priority") && filterValuesPriority.value.includes(task.priority));
+            
+}
+
+onMounted(async()=>{
+    fetchAll();
+    const response= await fetch("http://localhost:8000/categories");
+    categories=await response.json();
+});
+
 </script>
 
 <template>
+    
     <header class="utilities">
-        <div>
+        <div class="options">
             <div>Trier par:</div>
             <select>
                 <option @click="lastSort === 0 ?
@@ -137,6 +172,27 @@ function edited(name){
                             sortWrapper(tasks,1); ">Priorité {{ ascend_Prio ? "↓" : "↑" }}</option>
             </select>
         </div>
+        <div class="options">
+            <div>Filtres :</div>
+            <input type="checkbox" v-model="filterBy" value="category" id="category"><label for="category">Catégories</label>
+            <input type="checkbox" v-model="filterBy" value="priority" id="priority"><label for="priority">Priorités</label>
+        </div>
+        <div class="options" v-if="filterBy.includes('category')">
+            <div>Catégories:</div>
+            <div v-for="category,index in categories" class="filter-options">
+                <input type="checkbox" v-model="filterValuesCategory" :id="category" :value="index">
+                <label :for="category">{{ category }}</label>
+            </div>
+        </div>
+        <div class="options" v-if="filterBy.includes('priority')">
+            <div>Priorités:</div>
+            <div v-for="priority,index in priorities" class="filter-options">
+                <input type="checkbox" v-model="filterValuesPriority" :id="priority" :value="index">
+                <label :for="priority">{{ priority }}</label>
+            </div>
+        </div>
+        <button v-if="filterBy.length>0" @click="applyFilters">Appliquer</button>
+        <button v-if="tasksUnfiltered.length!=0" @click="removeFilters">Supprimer filtres</button>
     </header>
     <div class="todolist">
         <Task @edit="mountEditTaskForm"
@@ -185,6 +241,8 @@ function edited(name){
 }
 
 .utilities{
+    display: flex;
+    flex-direction: row;
     font-size: 20px;
     align-content: center;
     position:absolute;
@@ -197,6 +255,14 @@ function edited(name){
     background-color: white;
     height: 10vh;
     box-shadow:  0 2px 5px rgba(0, 0, 0, 0.1); ;
+}
+
+.utilities .options{
+    margin: 0px 10px;
+}
+
+.utilities .options .filter-options{
+    display: inline;
 }
 
 .utilities select{

@@ -37,7 +37,6 @@ import moment from 'moment';
                                 desc : userInput.value.desc
                             })
                         };
-        console.log(request);
         const response=await fetch(servURL+"/tasks",request);
         const out = response.json();
         if (out.detail){

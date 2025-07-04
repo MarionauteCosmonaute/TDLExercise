@@ -17,7 +17,6 @@ import moment from 'moment';
 
     const responset = await fetch(servURL+'/tasks/'+props.id);
     task.value = await responset.json();
-    console.log(task.value);
     const deadline=moment(task.value.date,"DD/MM/YYYY HH:mm");
     const userInput=ref({
         id:task.value.id,
@@ -54,9 +53,7 @@ import moment from 'moment';
                                 desc : userInput.value.desc
                             })
                         };
-        console.log(request)
-        const response=await fetch(servURL+"/tasks/"+props.id,request)
-
+        const response=await fetch(servURL+"/tasks/"+props.id,request);
         const out = response.json();
         if (out.detail){
             emit('error');

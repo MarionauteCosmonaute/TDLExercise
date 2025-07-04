@@ -30,14 +30,11 @@ async function fetchAll(){
 
 
 function sortWrapper(list,methodId){
-    console.log(lastSort.value);
-    console.log(ascend_Date,ascend_Prio);
     list.sort(methodId === 0 ? sortbyDate : sortbyPriority);
     lastSort.value=methodId;
 }
 
 function sortbyDate(a,b){
-    console.log("sort by Date" + ascend_Date ? "asc" : "desc")
     const A=moment(a.date,"DD/MM/YYYY HH:mm",true);
     const B=moment(b.date,"DD/MM/YYYY HH:mm",true);
     if(A.isBefore(B,"second")){
@@ -51,7 +48,6 @@ function sortbyDate(a,b){
 }
 
 function sortbyPriority(a,b){
-    console.log("sort by Date" + ascend_Date ? "asc" : "desc")
     const A=a.priority;
     const B=b.priority;
     if (A<B){
@@ -89,7 +85,6 @@ async function removeTask(id){
     tasks.value.forEach((task)=>{
             if(task.id != out.id){
                 temp.push(task);
-                console.log(temp);
             }
         });
     tasks.value=temp;

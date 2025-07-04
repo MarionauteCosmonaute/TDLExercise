@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import moment from 'moment';
-    const emit=defineEmits(['close','refresh']);
+    const emit=defineEmits(['close','refresh','error']);
     const servURL="http://localhost:8000"
     let categories=ref([]);
     let priorities=["Basse","Moyenne","Haute"];
@@ -37,11 +37,15 @@ import moment from 'moment';
                                 desc : userInput.value.desc
                             })
                         };
-        console.log(request)
-        await fetch(servURL+"/tasks",request)
-        emit('refresh')
-        emit('close')
-        
+        console.log(request);
+        const response=await fetch(servURL+"/tasks",request);
+        const out = response.json();
+        if (out.detail){
+            emit('error');
+        }else{
+            emit('refresh',userInput.value.name);
+            emit('close');
+        }
     }
 
 </script>

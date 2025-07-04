@@ -55,10 +55,15 @@ import moment from 'moment';
                             })
                         };
         console.log(request)
-        await fetch(servURL+"/tasks/"+props.id,request)
-        emit('refresh')
-        emit('close')
-        
+        const response=await fetch(servURL+"/tasks/"+props.id,request)
+
+        const out = response.json();
+        if (out.detail){
+            emit('error');
+        }else{
+            emit('refresh',userInput.value.name);
+            emit('close');
+        }
     }
 
 

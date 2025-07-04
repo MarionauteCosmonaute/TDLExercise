@@ -4,23 +4,24 @@ import moment from 'moment'
 import Task from './components/Task.vue'
 import FormCreateTask from './components/FormCreateTask.vue'
 import FormEditTask from './components/FormEditTask.vue'
+import { useToast } from "vue-toastification";
 
-
-const tasks = ref([])
+const toast=useToast();
+const tasks = ref([]);
 let ascend_Date=true;
 let ascend_Prio=true;
 let shownCreateTaskForm=ref(false);
-let shownEditTaskForm = ref(false)
-let editTaskId = ref(null)
+let shownEditTaskForm = ref(false);
+let editTaskId = ref(null);
 let lastSort=ref(0); //0 => Date else=>Prio
 
 async function fetchAll(){
     const response = await fetch('http://localhost:8000/tasks')
-    tasks.value = await response.json()
+    tasks.value = await response.json();
     console.log(lastSort.value);
     console.log(ascend_Date,ascend_Prio);
-    sortWrapper(tasks.value,lastSort.value)
-    console.log(tasks.value)
+    sortWrapper(tasks.value,lastSort.value);
+    console.log(tasks.value);
 }
 
 onMounted(async()=>{
@@ -75,15 +76,15 @@ function mountEditTaskForm(id) {
   editTaskId.value = id;
 }
 
-function unmountEditTaskForm() {
+function closeEditTaskForm() {
   shownEditTaskForm.value = false;
   editTaskId.value = null;
 }
 
 async function removeTask(id){
     const response = await fetch(`http://localhost:8000/tasks/${id}`,{method:"DELETE"});
-    const out=await response.json()
-    const temp=[]
+    const out=await response.json();
+    const temp=[];
     tasks.value.forEach((task)=>{
             if(task.id != out.id){
                 temp.push(task);
@@ -91,8 +92,35 @@ async function removeTask(id){
             }
         });
     tasks.value=temp;
+    successNotify("Tâche supprimée");
 }
 
+function successNotify(msg){
+    toast.success(msg+" avec succès", {
+    position: "bottom-left",
+    timeout: 5000,
+    closeOnClick: true,
+    pauseOnFocusLoss: true,
+    pauseOnHover: true,
+    draggable: true,
+    draggablePercent: 0.6,
+    showCloseButtonOnHover: false,
+    hideProgressBar: false,
+    closeButton: "button",
+    icon: true,
+    rtl: false
+});
+}
+
+function created(name){
+    fetchAll();
+    successNotify(name+" crée");
+}
+
+function edited(name){
+    fetchAll();
+    successNotify(name+" modifié");
+}
 
 </script>
 
@@ -125,11 +153,11 @@ async function removeTask(id){
     </div>
     <button class="add-task-show-form" @click="showCreateTaskForm" title="Créer une nouvelle tâche">+</button>
     <Suspense>
-        <FormCreateTask v-if="shownCreateTaskForm" @close="closeTaskForm" @refresh="fetchAll"/>
+        <FormCreateTask v-if="shownCreateTaskForm" @close="closeTaskForm" @refresh="created"/>
     </Suspense>
 
     <Suspense>
-        <FormEditTask v-if="shownEditTaskForm" :id="editTaskId" @close="unmountEditTaskForm" @refresh="fetchAll"/>
+        <FormEditTask v-if="shownEditTaskForm" :id="editTaskId" @close="closeEditTaskForm" @refresh="edited"/>
     </Suspense>
 </template>
 

@@ -23,11 +23,7 @@ const props = defineProps({
         required : true
     }
 })
-    let checked= false;
-    const delBtn = ref(null)
-    function remove(){
-        
-    }
+    let checked= ref(false);
 
     let showEditBtns= ref(false);
 
@@ -75,7 +71,7 @@ const props = defineProps({
                     <button class="edit-btn" title="Modifier" @click="$emit('edit',id)" >
                         <img class="edit-img" src="../assets/edit-button-svgrepo-com.svg">
                     </button>
-                    <button class="del-btn" ref="delBtn" @click="$emit('remove',id)" :id="{ id }" title="Supprimer">X</button>
+                    <button class="del-btn" @click="$emit('remove',id)" :id="{ id }" title="Supprimer">X</button>
                 </div>
     </div>
 </template>

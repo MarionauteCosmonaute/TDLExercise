@@ -22,11 +22,11 @@ tdl:ToDoList = ToDoList()
 tdl.demo()
 
 class RequestFields(BaseModel):
-    name : str | None =None
-    desc : str | None =None
-    category : int | None =None
-    priority : int | None =None
-    date : str | None =None
+    name : str 
+    desc : str | None
+    category : int 
+    priority : int 
+    date : str 
 
 
 

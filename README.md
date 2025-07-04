@@ -17,7 +17,8 @@ fastapi run src/server.py
 ### 2- Lancer le frontend:
 ```
 cd ToDoListProject
-npm dev run
+npm run build
+npm run preview
 ```
 
 ## Issues:
